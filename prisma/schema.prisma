@@ -44,7 +44,8 @@ enum ServicesLocation {
 }
 
 model Location {
-  id              Int                                   @id @default(autoincrement())
+  id Int @id @default(autoincrement())
+
   name            String
   coordinates     Unsupported("geography(Point, 4326)")
   providerProfile ProviderProfile?
