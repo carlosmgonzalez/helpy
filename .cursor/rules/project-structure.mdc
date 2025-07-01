@@ -1,0 +1,15 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Project Structure Guide
+
+The main source code is located in [`src/`](mdc:src), which contains application logic, components, and routes.
+
+- SvelteKit routes are defined in [`src/routes/`](mdc:src/routes).
+- Reusable Svelte components are organized under [`src/lib/components/`](mdc:src/lib/components).
+- The database schema is managed with Prisma in [`prisma/schema.prisma`](mdc:prisma/schema.prisma).
+
+Refer to these directories for the core structure and extension points of the project.
+

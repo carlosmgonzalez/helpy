@@ -8,8 +8,8 @@
 	let { children } = $props();
 </script>
 
-<ModeWatcher />
 <Sidebar.Provider>
+	<ModeWatcher />
 	<AppSidebar />
 	<main class="w-full">
 		<AppNavbar />

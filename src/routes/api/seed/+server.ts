@@ -1,22 +1,45 @@
-import { users } from '$lib/database/seed';
-import prisma from '$lib/prisma';
-import { json, type RequestHandler } from '@sveltejs/kit';
+import { providersProfilesSeed, usersSeed } from '$lib/database/seed';
+import db from '$lib/server/drizzle';
+import { providerProfile, user, type ServicesLocationType } from '$lib/server/drizzle/schema';
+import { error, json, type RequestHandler } from '@sveltejs/kit';
 
 export const GET: RequestHandler = async () => {
-	await Promise.all(
-		users.map((user) =>
-			prisma.user.create({
-				data: {
-					id: user.id,
-					name: user.name,
-					email: user.email
-				}
-			})
-		)
-	);
+	try {
+		await Promise.all(
+			usersSeed.map((data) =>
+				db.insert(user).values({
+					id: data.id,
+					name: data.name,
+					email: data.email
+				})
+			)
+		);
 
-	return json({
-		ok: true,
-		message: 'Seed executed'
-	});
+		await Promise.all(
+			providersProfilesSeed.map((data) =>
+				db.insert(providerProfile).values({
+					id: data.id,
+					userId: data.userId,
+					location: {
+						x: data.location.x,
+						y: data.location.y
+					},
+					address: data.address,
+					bio: data.bio,
+					yearsOfExperience: data.yearsOfExperience,
+					serviceLocationType: data.serviceLocationType as ServicesLocationType
+				})
+			)
+		);
+
+		return json({
+			ok: true,
+			message: 'Seed executed'
+		});
+	} catch (e) {
+		console.error(e);
+		return error(400, {
+			message: 'Something went wrong while executed seed'
+		});
+	}
 };
