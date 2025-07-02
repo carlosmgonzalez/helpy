@@ -11,7 +11,7 @@
 <Sidebar.Provider>
 	<ModeWatcher />
 	<AppSidebar />
-	<main class="w-full">
+	<main class="flex h-screen w-full flex-col">
 		<AppNavbar />
 		{@render children()}
 	</main>

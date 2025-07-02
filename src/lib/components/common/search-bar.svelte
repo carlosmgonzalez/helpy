@@ -40,7 +40,7 @@
 		<!-- {#snippet child({ props })} -->
 		<Button
 			variant="secondary"
-			class="bg-background flex w-[300px] justify-between shadow-md"
+			class="flex w-[300px] justify-between shadow-md"
 			role="combobox"
 			aria-expanded={open}
 		>

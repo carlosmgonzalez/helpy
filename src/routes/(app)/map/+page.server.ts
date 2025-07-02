@@ -5,13 +5,13 @@ import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
 	try {
-		const users = await db
+		const initialData = await db
 			.select()
 			.from(user)
 			.innerJoin(serviceProfile, eq(user.id, serviceProfile.userId));
 
 		return {
-			users
+			initialData
 		};
 	} catch (error) {
 		console.log(error);

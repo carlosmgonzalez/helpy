@@ -5,7 +5,8 @@
 	import SearchBar from '$lib/components/common/search-bar.svelte';
 	import FilterButton from '$lib/components/common/filter-button.svelte';
 	import OpenInfoDrawer from '$lib/components/common/open-info-drawer.svelte';
-	import type { PageProps } from '../$types';
+	import type { PageProps } from './$types';
+	import { House, MapPinHouse } from '@lucide/svelte';
 
 	let mapContainer: HTMLElement;
 	let service = $state('');
@@ -15,7 +16,7 @@
 	const createMap = (lon: number, lat: number) => {
 		const map = new mapboxgl.Map({
 			container: mapContainer,
-			style: 'mapbox://styles/mapbox/streets-v12',
+			style: 'mapbox://styles/mapbox/light-v11',
 			center: [lon, lat],
 			zoom: 15
 		});
@@ -73,17 +74,16 @@
 	<link href="https://api.mapbox.com/mapbox-gl-js/v3.12.0/mapbox-gl.css" rel="stylesheet" />
 </svelte:head>
 
-<div bind:this={mapContainer} class="relative h-[calc(100%-50px)] w-full">
-	<div
-		class="absolute top-[10px] right-0 left-0 z-20 flex w-full flex-row items-center justify-center gap-2"
-	>
-		<SearchBar options={[]} value={service} />
-		<FilterButton />
-	</div>
+<div class="flex w-full flex-row items-center justify-center gap-2 py-3">
+	<SearchBar options={[]} value={service} />
+	<FilterButton />
+</div>
+<div class="flex w-full flex-1 grow p-2">
+	<div bind:this={mapContainer} class="h-full w-full rounded-md"></div>
 </div>
 
 <div id="el">
-	<OpenInfoDrawer name="carlos" bio="Soy yo" priceFrom={10} priceTo={43} />
+	<House class="size-7 fill-blue-800/80 text-blue-800" />
 </div>
 
 {#if data.initialData}

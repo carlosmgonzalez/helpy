@@ -16,7 +16,7 @@
 
 <Drawer.Root>
 	<Drawer.Trigger>
-		<MapPin class="size-7 text-red-700" />
+		<MapPin class="fill-primary/80 text-primary size-7" />
 	</Drawer.Trigger>
 	<Drawer.Content>
 		<Drawer.Header class="flex flex-row items-center gap-2">

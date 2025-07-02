@@ -5,9 +5,7 @@
 </script>
 
 <Sheet.Root>
-	<Sheet.Trigger
-		class={buttonVariants({ variant: 'secondary', size: 'icon', class: 'bg-background' })}
-	>
+	<Sheet.Trigger class={buttonVariants({ variant: 'secondary', size: 'icon' })}>
 		<ListFilter class="size-5" />
 	</Sheet.Trigger>
 	<Sheet.Content>
