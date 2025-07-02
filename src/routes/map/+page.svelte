@@ -5,10 +5,36 @@
 	import SearchBar from '$lib/components/common/search-bar.svelte';
 	import FilterButton from '$lib/components/common/filter-button.svelte';
 	import OpenInfoDrawer from '$lib/components/common/open-info-drawer.svelte';
+	import type { PageProps } from '../$types';
 
 	let mapContainer: HTMLElement;
-
 	let service = $state('');
+
+	const { data }: PageProps = $props();
+
+	const createMap = (lon: number, lat: number) => {
+		const map = new mapboxgl.Map({
+			container: mapContainer,
+			style: 'mapbox://styles/mapbox/streets-v12',
+			center: [lon, lat],
+			zoom: 15
+		});
+
+		const el = document.getElementById('el')!;
+		new mapboxgl.Marker(el).setLngLat([lon, lat]).addTo(map);
+
+		// Usar setTimeout para asegurar que los elementos DOM estén disponibles
+		setTimeout(() => {
+			data.initialData!.forEach(({ user, service_profile }) => {
+				const a = document.getElementById(user.id);
+				if (a) {
+					new mapboxgl.Marker(a)
+						.setLngLat([service_profile.location.x, service_profile.location.y])
+						.addTo(map);
+				}
+			});
+		}, 0);
+	};
 
 	onMount(() => {
 		mapboxgl.accessToken = PUBLIC_MAPBOX_TOKEN;
@@ -19,17 +45,7 @@
 					const longitude = position.coords.longitude;
 					const latitude = position.coords.latitude;
 
-					const map = new mapboxgl.Map({
-						container: mapContainer,
-						style: 'mapbox://styles/mapbox/streets-v12',
-						center: [longitude, latitude],
-						zoom: 15
-					});
-
-					const el = document.getElementById('el')!;
-
-					new mapboxgl.Marker(el).setLngLat([longitude, latitude]).addTo(map);
-					// .setPopup(new mapboxgl.Popup().setHTML('<h1>Hello World!</h1>'))
+					createMap(longitude, latitude);
 				},
 				(error) => {
 					switch (error.code) {
@@ -67,5 +83,19 @@
 </div>
 
 <div id="el">
-	<OpenInfoDrawer />
+	<OpenInfoDrawer name="carlos" bio="Soy yo" priceFrom={10} priceTo={43} />
 </div>
+
+{#if data.initialData}
+	{#each data.initialData as info (info.user.id)}
+		<div id={info.user.id}>
+			<OpenInfoDrawer
+				name={info.user.name}
+				image={info.user.image}
+				bio={info.service_profile.bio!}
+				priceFrom={info.service_profile.priceFrom}
+				priceTo={info.service_profile.priceTo}
+			/>
+		</div>
+	{/each}
+{/if}

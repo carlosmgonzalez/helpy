@@ -1,33 +1,46 @@
-import { providersProfilesSeed, usersSeed } from '$lib/database/seed';
+import { serviceProfilesSeed, servicesSeed, usersSeed } from '$lib/database/seed';
 import db from '$lib/server/drizzle';
-import { providerProfile, user, type ServicesLocationType } from '$lib/server/drizzle/schema';
+import { serviceProfile, service, user, type ModalityType } from '$lib/server/drizzle/schema';
 import { error, json, type RequestHandler } from '@sveltejs/kit';
+import { sql } from 'drizzle-orm';
 
 export const GET: RequestHandler = async () => {
 	try {
+		await Promise.all([db.delete(user), db.delete(service), db.delete(serviceProfile)]);
+
 		await Promise.all(
 			usersSeed.map((data) =>
 				db.insert(user).values({
 					id: data.id,
 					name: data.name,
-					email: data.email
+					email: data.email,
+					image: data.image
 				})
 			)
 		);
 
 		await Promise.all(
-			providersProfilesSeed.map((data) =>
-				db.insert(providerProfile).values({
+			serviceProfilesSeed.map((data) =>
+				db.insert(serviceProfile).values({
 					id: data.id,
 					userId: data.userId,
-					location: {
-						x: data.location.x,
-						y: data.location.y
-					},
+					location: sql`ST_SetSRID(ST_MakePoint(${data.location.x}, ${data.location.y}), 4326)`,
 					address: data.address,
 					bio: data.bio,
 					yearsOfExperience: data.yearsOfExperience,
-					serviceLocationType: data.serviceLocationType as ServicesLocationType
+					modalityType: data.modalityType as ModalityType,
+					priceTo: data.priceTo,
+					priceFrom: data.priceFrom
+				})
+			)
+		);
+
+		await Promise.all(
+			servicesSeed.map((data) =>
+				db.insert(service).values({
+					id: data.id,
+					name: data.name,
+					description: data.description
 				})
 			)
 		);
