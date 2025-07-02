@@ -78,24 +78,24 @@
 	<SearchBar options={[]} value={service} />
 	<FilterButton />
 </div>
-<div class="flex w-full flex-1 grow p-2">
-	<div bind:this={mapContainer} class="h-full w-full rounded-md"></div>
-</div>
-
-<div id="el">
-	<House class="size-7 fill-blue-800/80 text-blue-800" />
-</div>
-
-{#if data.initialData}
-	{#each data.initialData as info (info.user.id)}
-		<div id={info.user.id}>
-			<OpenInfoDrawer
-				name={info.user.name}
-				image={info.user.image}
-				bio={info.service_profile.bio!}
-				priceFrom={info.service_profile.priceFrom}
-				priceTo={info.service_profile.priceTo}
-			/>
+<div class="w-full flex-1 p-2">
+	<div bind:this={mapContainer} class="h-full w-full rounded-md">
+		<div id="el">
+			<House class="size-7 fill-blue-800/80 text-blue-800" />
 		</div>
-	{/each}
-{/if}
+
+		{#if data.initialData}
+			{#each data.initialData as info (info.user.id)}
+				<div id={info.user.id}>
+					<OpenInfoDrawer
+						name={info.user.name}
+						image={info.user.image}
+						bio={info.service_profile.bio!}
+						priceFrom={info.service_profile.priceFrom}
+						priceTo={info.service_profile.priceTo}
+					/>
+				</div>
+			{/each}
+		{/if}
+	</div>
+</div>

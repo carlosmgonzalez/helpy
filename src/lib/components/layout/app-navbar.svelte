@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { useSidebar } from '$lib/components/ui/sidebar/index.js';
-	import { LogOut, Menu, MoonIcon, SunIcon } from '@lucide/svelte';
+	import { LogIn, LogOut, Menu, MoonIcon, SunIcon } from '@lucide/svelte';
 	import * as Avatar from '$lib/components/ui/avatar/index';
 	import Button from '../ui/button/button.svelte';
 	import { toggleMode } from 'mode-watcher';
@@ -33,7 +33,7 @@
 			</Button>
 		</div>
 		<Logo width="140" height="100" />
-		<div class="flex w-20 items-center justify-end gap-x-1">
+		<div class="flex w-20 items-center justify-end">
 			<Button onclick={toggleMode} variant="ghost" size="icon">
 				<SunIcon class="size-6 scale-100 rotate-0 !transition-all dark:scale-0 dark:-rotate-90" />
 				<MoonIcon
@@ -72,7 +72,9 @@
 					</DropdownMenu.Content>
 				</DropdownMenu.Root>
 			{:else}
-				<Button href="/auth/login">Ingresar</Button>
+				<Button href="/auth/login" variant="ghost" size="icon">
+					<LogIn class="text-primary size-6" />
+				</Button>
 			{/if}
 		</div>
 	</div>
