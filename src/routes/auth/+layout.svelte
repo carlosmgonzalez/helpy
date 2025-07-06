@@ -3,7 +3,7 @@
 </script>
 
 <div class="flex h-full flex-col items-center justify-between">
-	<div class="mx-2 flex w-full items-center justify-center">
+	<div class="flex w-full items-center justify-center px-2">
 		{@render children()}
 	</div>
 	<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" width="100%">

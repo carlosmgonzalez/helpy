@@ -6,7 +6,7 @@
 	import FilterButton from '$lib/components/common/filter-button.svelte';
 	import OpenInfoDrawer from '$lib/components/common/open-info-drawer.svelte';
 	import type { PageProps } from './$types';
-	import { House, MapPinHouse } from '@lucide/svelte';
+	import { House } from '@lucide/svelte';
 
 	let mapContainer: HTMLElement;
 	let service = $state('');

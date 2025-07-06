@@ -20,18 +20,22 @@
 <Sidebar.Root>
 	<Sidebar.Content>
 		<Sidebar.Group>
-			<Sidebar.GroupLabel>Application</Sidebar.GroupLabel>
+			<Sidebar.GroupLabel>Menu</Sidebar.GroupLabel>
 			<Sidebar.GroupContent>
 				<Sidebar.Menu>
 					{#each items as item (item.title)}
 						<Sidebar.MenuItem>
 							<Sidebar.MenuButton>
-								{#snippet child({ props })}
+								<!-- {#snippet child({ props })}
 									<a href={item.url} {...props}>
-										<item.icon />
-										<span>{item.title}</span>
+										<item.icon class="size-10" />
+										<span class="text-xl">{item.title}</span>
 									</a>
-								{/snippet}
+								{/snippet} -->
+								<a href={item.url} class="flex w-full flex-row items-center gap-2">
+									<span class="text-2xl">{item.title}</span>
+									<!-- <item.icon class="size-5" /> -->
+								</a>
 							</Sidebar.MenuButton>
 						</Sidebar.MenuItem>
 					{/each}

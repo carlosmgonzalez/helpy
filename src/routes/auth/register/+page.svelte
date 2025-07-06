@@ -50,7 +50,13 @@
 				</div>
 				<div class="grid gap-2">
 					<Label for="email">Correo</Label>
-					<Input id="email" bind:value={email} type="email" placeholder="yo@ejemplo.com" required />
+					<Input
+						id="email"
+						bind:value={email}
+						type="email"
+						placeholder="juan@ejemplo.com"
+						required
+					/>
 				</div>
 				<div class="grid gap-2">
 					<Label for="password">Contraseña</Label>

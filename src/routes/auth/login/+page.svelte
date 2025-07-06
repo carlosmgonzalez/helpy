@@ -10,6 +10,7 @@
 	let email = $state('');
 	let password = $state('');
 	let isLoading = $state(false);
+	let error = $state('');
 
 	const signInWithEmail = async () => {
 		isLoading = true;
@@ -20,6 +21,9 @@
 				fetchOptions: {
 					onSuccess: () => {
 						window.location.replace('/');
+					},
+					onError: ({ error: e }) => {
+						error = e.message;
 					}
 				}
 			});
@@ -44,7 +48,13 @@
 			<div class="flex flex-col gap-6">
 				<div class="grid gap-2">
 					<Label for="email">Correo</Label>
-					<Input id="email" bind:value={email} type="email" placeholder="yo@ejemplo.com" required />
+					<Input
+						id="email"
+						bind:value={email}
+						type="email"
+						placeholder="juan@ejemplo.com"
+						required
+					/>
 				</div>
 				<div class="grid gap-2">
 					<div class="flex items-center">
@@ -65,6 +75,9 @@
 		</form>
 	</Card.Content>
 	<Card.Footer class="flex-col gap-2">
+		{#if error.length > 0}
+			<span class="text-destructive text-center font-light">{error}</span>
+		{/if}
 		<Button onclick={() => signInWithEmail()} type="submit" class="w-full">
 			{#if isLoading}
 				<Loader class="animate-spin" />

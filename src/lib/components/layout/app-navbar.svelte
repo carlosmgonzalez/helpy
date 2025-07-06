@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { useSidebar } from '$lib/components/ui/sidebar/index.js';
-	import { LogIn, LogOut, Menu, MoonIcon, SunIcon } from '@lucide/svelte';
+	import { Cog, LogIn, LogOut, Menu, MoonIcon, SunIcon } from '@lucide/svelte';
 	import * as Avatar from '$lib/components/ui/avatar/index';
 	import Button from '../ui/button/button.svelte';
 	import { toggleMode } from 'mode-watcher';
@@ -55,6 +55,15 @@
 						<DropdownMenu.Item>
 							{user.email}
 						</DropdownMenu.Item>
+						<DropdownMenu.Item>
+							<a
+								href="/create-service-profile"
+								class="flex w-full flex-row items-center justify-between"
+							>
+								<span>Configuración</span>
+								<Cog class="size-6" />
+							</a>
+						</DropdownMenu.Item>
 						<DropdownMenu.Item
 							onclick={() =>
 								authClient.signOut({
@@ -64,7 +73,7 @@
 										}
 									}
 								})}
-							class="flex flex-row items-center justify-between gap-2"
+							class="flex flex-row items-center justify-between"
 						>
 							<span> Cerrar sesión </span>
 							<LogOut class="text-destructive size-5" />
