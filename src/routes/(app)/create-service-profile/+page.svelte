@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { tick } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import * as Command from '$lib/components/ui/command/index';
 	import * as Popover from '$lib/components/ui/popover/index';
 	import * as Select from '$lib/components/ui/select/index';
@@ -13,16 +13,27 @@
 	import { Slider } from '$lib/components/ui/slider/index';
 	import { formatPrice } from '$lib/utils/formatters';
 	import { PUBLIC_MAPBOX_TOKEN } from '$env/static/public';
-	import type { ResponseGeocode } from '$lib/interfaces/response-geocode-mapbox';
-	import { Loader } from '@lucide/svelte';
+	import type {
+		ResponseReverseGeocode,
+		ResponseSearchGeocode
+	} from '$lib/interfaces/response-geocode-mapbox';
+	import { Loader, Locate } from '@lucide/svelte';
+	import type { PageProps } from './$types';
+	import Footer from '$lib/components/layout/footer.svelte';
 
-	const url = `https://api.mapbox.com/search/geocode/v6/forward?autocomplete=true&country=ar&types=address,street&access_token=${PUBLIC_MAPBOX_TOKEN}`;
+	const { data: loadedData }: PageProps = $props();
+
+	const urlSearch = `https://api.mapbox.com/search/geocode/v6/forward?autocomplete=true&country=ar&types=address,street&access_token=${PUBLIC_MAPBOX_TOKEN}`;
+	const urlReverse = `https://api.mapbox.com/search/geocode/v6/reverse?types=address,street&access_token=${PUBLIC_MAPBOX_TOKEN}`;
 
 	interface Address {
 		id: string;
 		coordinates: number[];
 		fullAddress: string;
 	}
+
+	let bio = $state('');
+	let yearsOfExperience = $state(0);
 
 	let inputSearchAddress = $state('');
 	let suggestedAddressesList: Address[] | null = $state(null);
@@ -32,8 +43,8 @@
 	const searchAddress = async () => {
 		isLoading['searchAddress'] = true;
 		try {
-			const res = await fetch(`${url}&q=${inputSearchAddress}`);
-			const data: ResponseGeocode = await res.json();
+			const res = await fetch(`${urlSearch}&q=${inputSearchAddress}`);
+			const data: ResponseSearchGeocode = await res.json();
 			if (data && data.features.length > 0) {
 				suggestedAddressesList = data.features.map((f) => ({
 					id: f.id,
@@ -53,16 +64,61 @@
 		}
 	};
 
-	const services = [
-		{
-			value: 'veterinario',
-			label: 'Veterinario'
-		},
-		{
-			value: 'psicologo',
-			label: 'Psicologo'
+	const searchReverseAddress = () => {
+		isLoading['reverseAddress'] = true;
+		if ('geolocation' in navigator) {
+			navigator.geolocation.getCurrentPosition(
+				async (position) => {
+					try {
+						const longitude = position.coords.longitude.toString();
+						const latitude = position.coords.latitude.toString();
+
+						const res = await fetch(`${urlReverse}&longitude=${longitude}&latitude=${latitude}`);
+						const data: ResponseReverseGeocode = await res.json();
+						if (data && data.features.length > 0) {
+							selectedAddress = {
+								id: data.features[0].id,
+								coordinates: data.features[0].geometry.coordinates,
+								fullAddress: data.features[0].properties.full_address
+							};
+							inputSearchAddress = data.features[0].properties.full_address;
+						}
+					} catch (e) {
+						console.log(e);
+					} finally {
+						isLoading['reverseAddress'] = false;
+					}
+				},
+				(error) => {
+					isLoading['reverseAddress'] = false;
+					switch (error.code) {
+						case error.PERMISSION_DENIED:
+							console.error('Usuario denegó la solicitud de geolocalización.');
+							break;
+						case error.POSITION_UNAVAILABLE:
+							console.error('Información de ubicación no disponible.');
+							break;
+						case error.TIMEOUT:
+							console.error('La solicitud de obtener la ubicación ha caducado.');
+							break;
+						default:
+							console.error('Un error desconocido ocurrió.');
+							break;
+					}
+				}
+			);
+		} else {
+			isLoading['reverseAddress'] = false;
 		}
-	];
+	};
+
+	const services = $derived(
+		loadedData.services.map((service) => ({
+			id: service.id,
+			value: service.name,
+			label: service.name
+		}))
+	);
 
 	let service = $state('');
 	let open = $state(false);
@@ -106,7 +162,9 @@
 			selectedAddress,
 			service,
 			price,
-			modality
+			modality,
+			bio,
+			yearsOfExperience
 		});
 	};
 </script>
@@ -144,9 +202,9 @@
 								<Command.Group value="options">
 									{#each services as option, i (option.value + '-' + i)}
 										<Command.Item
-											value={option.value}
+											value={option.value!}
 											onSelect={() => {
-												service = option.value;
+												service = option.value!;
 												closeAndFocusTrigger();
 											}}
 										>
@@ -163,7 +221,7 @@
 			<div class="flex w-full flex-row items-center gap-2">
 				<div class="w-full">
 					<span class="mb-1 text-sm font-light">Años de experiencia</span>
-					<Input type="number" />
+					<Input bind:value={yearsOfExperience} type="number" />
 				</div>
 				<div class="w-full">
 					<span class="mb-1 text-sm font-light">Modalidad del servicio</span>
@@ -203,6 +261,13 @@
 							Buscar
 						{/if}
 					</Button>
+					<Button onclick={() => searchReverseAddress()} disabled={isLoading['reverseAddress']}>
+						{#if isLoading['reverseAddress']}
+							<Loader class="animate-spin" />
+						{:else}
+							<Locate />
+						{/if}
+					</Button>
 				</div>
 				{#if suggestedAddressesList}
 					<lu
@@ -232,18 +297,17 @@
 			</div>
 			<div class="grid w-full gap-1.5">
 				<Label for="message" class="font-light">Biografía</Label>
-				<Textarea maxlength={255} placeholder="Escribe tu biografía acá..." id="message" />
+				<Textarea
+					bind:value={bio}
+					maxlength={255}
+					placeholder="Escribe tu biografía acá..."
+					id="message"
+				/>
 			</div>
 			<Button onclick={saveServiceProfile}>Guardar</Button>
 		</form>
 	</div>
-	<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" width="100%">
-		<path
-			fill="#e05d38"
-			fill-opacity="1"
-			d="M0,128L80,149.3C160,171,320,213,480,218.7C640,224,800,192,960,160C1120,128,1280,96,1360,80L1440,64L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"
-		></path>
-	</svg>
+	<Footer />
 </div>
 
 <!-- 
