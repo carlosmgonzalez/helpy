@@ -467,7 +467,8 @@
 								<div class="flex flex-row items-center gap-2">
 									<div class="flex w-full flex-row items-center gap-2">
 										<span class="text-sm font-light">Desde:</span>
-										{#if isFocusedPriceFrom}
+										<Input type="number" bind:value={priceFrom} />
+										<!-- {#if isFocusedPriceFrom}
 											<Input
 												type="number"
 												bind:value={priceFrom}
@@ -489,11 +490,12 @@
 													isFocusedPriceFrom = false;
 												}}
 											/>
-										{/if}
+										{/if} -->
 									</div>
 									<div class="flex w-full flex-row items-center gap-2">
 										<span class="text-sm font-light">Hasta:</span>
-										{#if isFocusedPriceTo}
+										<Input type="number" bind:value={priceTo} />
+										<!-- {#if isFocusedPriceTo}
 											<Input
 												type="number"
 												bind:value={priceTo}
@@ -515,7 +517,7 @@
 													isFocusedPriceTo = false;
 												}}
 											/>
-										{/if}
+										{/if} -->
 									</div>
 								</div>
 							</div>
