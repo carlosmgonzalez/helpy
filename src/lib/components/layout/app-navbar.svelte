@@ -56,10 +56,7 @@
 							{user.email}
 						</DropdownMenu.Item>
 						<DropdownMenu.Item>
-							<a
-								href="/create-service-profile"
-								class="flex w-full flex-row items-center justify-between"
-							>
+							<a href="/create-profile" class="flex w-full flex-row items-center justify-between">
 								<span>Configuración</span>
 								<Cog class="size-6" />
 							</a>

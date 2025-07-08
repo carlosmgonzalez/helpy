@@ -40,31 +40,36 @@
 	onMount(() => {
 		mapboxgl.accessToken = PUBLIC_MAPBOX_TOKEN;
 
-		if ('geolocation' in navigator) {
-			navigator.geolocation.getCurrentPosition(
-				(position) => {
-					const longitude = position.coords.longitude;
-					const latitude = position.coords.latitude;
+		if (data.client) {
+			const { x, y } = data.client.location;
+			createMap(x, y);
+		} else {
+			if ('geolocation' in navigator) {
+				navigator.geolocation.getCurrentPosition(
+					(position) => {
+						const longitude = position.coords.longitude;
+						const latitude = position.coords.latitude;
 
-					createMap(longitude, latitude);
-				},
-				(error) => {
-					switch (error.code) {
-						case error.PERMISSION_DENIED:
-							console.error('Usuario denegó la solicitud de geolocalización.');
-							break;
-						case error.POSITION_UNAVAILABLE:
-							console.error('Información de ubicación no disponible.');
-							break;
-						case error.TIMEOUT:
-							console.error('La solicitud de obtener la ubicación ha caducado.');
-							break;
-						default:
-							console.error('Un error desconocido ocurrió.');
-							break;
+						createMap(longitude, latitude);
+					},
+					(error) => {
+						switch (error.code) {
+							case error.PERMISSION_DENIED:
+								console.error('Usuario denegó la solicitud de geolocalización.');
+								break;
+							case error.POSITION_UNAVAILABLE:
+								console.error('Información de ubicación no disponible.');
+								break;
+							case error.TIMEOUT:
+								console.error('La solicitud de obtener la ubicación ha caducado.');
+								break;
+							default:
+								console.error('Un error desconocido ocurrió.');
+								break;
+						}
 					}
-				}
-			);
+				);
+			}
 		}
 	});
 </script>

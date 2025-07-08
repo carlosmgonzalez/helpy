@@ -22,6 +22,20 @@
       "when": 1751927189268,
       "tag": "0002_add_service_id_to_service_profile",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1752005599154,
+      "tag": "0003_client_service_interest_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1752008299905,
+      "tag": "0004_not_null_updated_created_at",
+      "breakpoints": true
     }
   ]
 }

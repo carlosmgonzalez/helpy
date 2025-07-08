@@ -6,6 +6,35 @@
 	const { data }: PageProps = $props();
 </script>
 
+<svelte:head>
+	<title>Helpy</title>
+	<meta name="title" content="Helpy" />
+	<meta name="description" content="El lugar donde puedes encontrar tu ayuda mas cercana" />
+
+	<!-- Open Graph / Facebook -->
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://helpy.work" />
+	<meta property="og:title" content="Helpy - Tu ayuda mas cercana" />
+	<meta property="og:description" content="El lugar donde puedes encontrar tu ayuda mas cercana" />
+	<meta
+		property="og:image"
+		content="https://res.cloudinary.com/difikt7so/image/upload/v1752011993/helpy/xxmnndigjjzwmqzdnn9z.png"
+	/>
+
+	<!-- Twitter -->
+	<meta property="twitter:card" content="summary_large_image" />
+	<meta property="twitter:url" content="https://helpy.work" />
+	<meta property="twitter:title" content="Helpy - Tu ayuda mas cercana" />
+	<meta
+		property="twitter:description"
+		content="El lugar donde puedes encontrar tu ayuda mas cercana"
+	/>
+	<meta
+		property="twitter:image"
+		content="https://res.cloudinary.com/difikt7so/image/upload/v1752011993/helpy/xxmnndigjjzwmqzdnn9z.png"
+	/>
+</svelte:head>
+
 <div class="flex h-full w-full flex-col">
 	<div class="relative h-[150px]">
 		<div

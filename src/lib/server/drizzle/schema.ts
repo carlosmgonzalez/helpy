@@ -1,5 +1,6 @@
 import { relations } from 'drizzle-orm';
 import {
+	primaryKey,
 	boolean,
 	foreignKey,
 	geometry,
@@ -106,7 +107,8 @@ export const service = pgTable('service', {
 });
 
 export const serviceRelation = relations(service, ({ many }) => ({
-	serviceProfile: many(serviceProfile)
+	serviceProfile: many(serviceProfile),
+	clientServiceInterest: many(clientServiceInterest)
 }));
 
 export const serviceProfile = pgTable(
@@ -154,6 +156,36 @@ export const clientProfile = pgTable('client_profile', {
 		.notNull(),
 	location: geometry('location', { type: 'point', mode: 'xy', srid: 4326 }).notNull()
 });
+
+export const clientProfileRelation = relations(clientProfile, ({ many }) => ({
+	clientServiceInterest: many(clientServiceInterest)
+}));
+
+export const clientServiceInterest = pgTable(
+	'client_service_interest',
+	{
+		clientProfileId: uuid('client_profile_id')
+			.references(() => clientProfile.id, { onDelete: 'cascade' })
+			.notNull(),
+		serviceId: uuid('service_id')
+			.references(() => service.id, { onDelete: 'cascade' })
+			.notNull(),
+		createdAt: timestamp('created_at').defaultNow().notNull(),
+		updatedAt: timestamp('updated_at').defaultNow().notNull()
+	},
+	(t) => [primaryKey({ columns: [t.clientProfileId, t.serviceId] })]
+);
+
+export const clientServiceInterestRelation = relations(clientServiceInterest, ({ one }) => ({
+	clientProfile: one(clientProfile, {
+		fields: [clientServiceInterest.clientProfileId],
+		references: [clientProfile.id]
+	}),
+	service: one(service, {
+		fields: [clientServiceInterest.serviceId],
+		references: [service.id]
+	})
+}));
 
 export const appointment = pgTable('appointment', {
 	id: uuid('id').defaultRandom().primaryKey(),

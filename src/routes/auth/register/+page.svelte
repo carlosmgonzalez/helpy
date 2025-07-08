@@ -21,7 +21,7 @@
 				name,
 				fetchOptions: {
 					onSuccess: () => {
-						window.location.replace('/');
+						window.location.replace('/create-profile');
 					}
 				}
 			});
