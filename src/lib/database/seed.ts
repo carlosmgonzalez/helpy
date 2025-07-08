@@ -37,7 +37,7 @@ export const serviceProfilesSeed = [
 		userId: 'c2b2d661-8c79-5c8c-96f2-75b4eb963145',
 		bio: 'Entrenador de mascotas especializado en obediencia básica',
 		yearsOfExperience: 8,
-		modalityType: 'client_home',
+		modalityType: ['client_home'],
 		address: 'San Martín 567',
 		location: {
 			x: -58.408282764082635,
@@ -51,7 +51,7 @@ export const serviceProfilesSeed = [
 		userId: '9ea0c661-7b68-4b7b-85e1-64a3da852033',
 		bio: 'Mucho gusto, soy un veterinario experto en gatos',
 		yearsOfExperience: 10,
-		modalityType: 'client_home',
+		modalityType: ['client_home'],
 		address: 'Rodriquez pena 208',
 		location: {
 			x: -58.3900844196679,
@@ -65,7 +65,7 @@ export const serviceProfilesSeed = [
 		userId: 'b1a1c661-7b68-4b7b-85e1-64a3da852034',
 		bio: 'Soy paseadora de perros con experiencia en adiestramiento canino',
 		yearsOfExperience: 5,
-		modalityType: 'client_home',
+		modalityType: ['client_home'],
 		address: 'Av. Corrientes 1234',
 		location: {
 			x: -58.39639478409676,
@@ -79,7 +79,7 @@ export const serviceProfilesSeed = [
 		userId: 'd3c3e661-9d8a-6d9d-a7f3-86c5fc074256',
 		bio: 'Peluquera canina y felina, trato amoroso y profesional',
 		yearsOfExperience: 6,
-		modalityType: 'client_home',
+		modalityType: ['client_home'],
 		address: 'Belgrano 890',
 		location: {
 			x: -58.41779540651727,
@@ -93,7 +93,7 @@ export const serviceProfilesSeed = [
 		userId: 'e4d4f661-0e9b-7e0e-b8f4-97d6ad185367',
 		bio: 'Veterinario especializado en animales exóticos',
 		yearsOfExperience: 12,
-		modalityType: 'client_home',
+		modalityType: ['client_home'],
 		address: 'Mitre 321',
 		location: {
 			x: -58.41447651951197,

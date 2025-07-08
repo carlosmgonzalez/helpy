@@ -1,5 +1,5 @@
 <footer
-	class="border-border bg-card text-card-foreground flex w-full flex-col items-center justify-between gap-4 border-t px-4 py-6 md:flex-row"
+	class="border-border bg-card flex w-full flex-col items-center justify-between gap-4 border-t px-4 py-6"
 >
 	<span class="font-roboto text-sm"
 		>© {new Date().getFullYear()} Helpy. Todos los derechos reservados.</span

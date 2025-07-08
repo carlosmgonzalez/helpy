@@ -32,7 +32,7 @@ export const dayOfWeek = pgEnum('day_of_week', [
 	'sunday'
 ]);
 
-export const modality = pgEnum('services_location', ['service_location', 'client_home', 'online']);
+export const modality = pgEnum('service_modality', ['service_location', 'client_home', 'online']);
 export type ModalityType = (typeof modality.enumValues)[number];
 
 export const user = pgTable(
@@ -46,10 +46,10 @@ export const user = pgTable(
 			.notNull(),
 		image: text('image'),
 		createdAt: timestamp('created_at')
-			.$defaultFn(() => /* @__PURE__ */ new Date())
+			.$defaultFn(() => new Date())
 			.notNull(),
 		updatedAt: timestamp('updated_at')
-			.$defaultFn(() => /* @__PURE__ */ new Date())
+			.$defaultFn(() => new Date())
 			.notNull()
 	},
 	(t) => [uniqueIndex('email_idx').on(t.email)]
@@ -95,15 +95,19 @@ export const verification = pgTable('verification', {
 	identifier: text('identifier').notNull(),
 	value: text('value').notNull(),
 	expiresAt: timestamp('expires_at').notNull(),
-	createdAt: timestamp('created_at').$defaultFn(() => /* @__PURE__ */ new Date()),
-	updatedAt: timestamp('updated_at').$defaultFn(() => /* @__PURE__ */ new Date())
+	createdAt: timestamp('created_at').$defaultFn(() => new Date()),
+	updatedAt: timestamp('updated_at').$defaultFn(() => new Date())
 });
 
 export const service = pgTable('service', {
 	id: uuid('id').defaultRandom().primaryKey(),
-	name: varchar('name', { length: 255 }).unique(),
+	name: varchar('name', { length: 255 }).unique().notNull(),
 	description: text('description')
 });
+
+export const serviceRelation = relations(service, ({ many }) => ({
+	serviceProfile: many(serviceProfile)
+}));
 
 export const serviceProfile = pgTable(
 	'service_profile',
@@ -114,10 +118,13 @@ export const serviceProfile = pgTable(
 		priceTo: integer('price_to').notNull(),
 		yearsOfExperience: integer('years_of_experience').default(0).notNull(),
 		isActive: boolean('is_active').default(false).notNull(),
-		modalityType: modality('modality_type').notNull(),
+		modalityType: modality('modality_type').array().notNull(),
 		address: text('address'),
 		location: geometry('location', { type: 'point', mode: 'xy', srid: 4326 }).notNull(),
-		userId: text('user_id').notNull()
+		userId: text('user_id').notNull(),
+		serviceId: uuid('service_id')
+			.references(() => service.id, { onDelete: 'cascade' })
+			.notNull()
 	},
 	(t) => [
 		index('spatial_index').using('gist', t.location),
@@ -129,18 +136,22 @@ export const serviceProfile = pgTable(
 	]
 );
 
-export const providerProfileRelation = relations(serviceProfile, ({ one }) => ({
+export const serviceProfileRelation = relations(serviceProfile, ({ one }) => ({
 	user: one(user, {
 		fields: [serviceProfile.userId],
 		references: [user.id]
+	}),
+	service: one(service, {
+		fields: [serviceProfile.serviceId],
+		references: [service.id]
 	})
 }));
 
 export const clientProfile = pgTable('client_profile', {
 	id: uuid('id').defaultRandom().primaryKey(),
 	userId: text('user_id')
-		.notNull()
-		.references(() => user.id, { onDelete: 'cascade' }),
+		.references(() => user.id, { onDelete: 'cascade' })
+		.notNull(),
 	location: geometry('location', { type: 'point', mode: 'xy', srid: 4326 }).notNull()
 });
 

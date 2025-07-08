@@ -8,6 +8,20 @@
       "when": 1751417264453,
       "tag": "0000_init",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1751900570342,
+      "tag": "0001_chage_table_name_modality",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1751927189268,
+      "tag": "0002_add_service_id_to_service_profile",
+      "breakpoints": true
     }
   ]
 }

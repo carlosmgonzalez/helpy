@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount, tick } from 'svelte';
+	import { tick } from 'svelte';
 	import * as Command from '$lib/components/ui/command/index';
 	import * as Popover from '$lib/components/ui/popover/index';
 	import * as Select from '$lib/components/ui/select/index';
@@ -17,11 +17,15 @@
 		ResponseReverseGeocode,
 		ResponseSearchGeocode
 	} from '$lib/interfaces/response-geocode-mapbox';
-	import { Loader, Locate } from '@lucide/svelte';
+	import { Loader, Locate, Pen } from '@lucide/svelte';
 	import type { PageProps } from './$types';
 	import Footer from '$lib/components/layout/footer.svelte';
+	import { enhance } from '$app/forms';
+	import type { Attachment } from 'svelte/attachments';
+	import { debounce } from '$lib/utils/debounce';
+	import { goto } from '$app/navigation';
 
-	const { data: loadedData }: PageProps = $props();
+	const { data: loadedData, form }: PageProps = $props();
 
 	const urlSearch = `https://api.mapbox.com/search/geocode/v6/forward?autocomplete=true&country=ar&types=address,street&access_token=${PUBLIC_MAPBOX_TOKEN}`;
 	const urlReverse = `https://api.mapbox.com/search/geocode/v6/reverse?types=address,street&access_token=${PUBLIC_MAPBOX_TOKEN}`;
@@ -62,6 +66,14 @@
 		} finally {
 			isLoading['searchAddress'] = false;
 		}
+	};
+
+	const debounceSearchAddress = debounce(searchAddress, 1000);
+
+	const attachmentInputSearch: Attachment = (element) => {
+		element.addEventListener('input', () => {
+			debounceSearchAddress();
+		});
 	};
 
 	const searchReverseAddress = () => {
@@ -115,16 +127,16 @@
 	const services = $derived(
 		loadedData.services.map((service) => ({
 			id: service.id,
-			value: service.name,
-			label: service.name
+			value: service.name
 		}))
 	);
 
 	let service = $state('');
+	let serviceId = $state('');
 	let open = $state(false);
 	let triggerRef = $state<HTMLButtonElement>(null!);
 
-	const filteringServices = $derived(services.find((f) => f.value === service)?.label);
+	const filteringServices = $derived(services.find((f) => f.value === service)?.value);
 
 	function closeAndFocusTrigger() {
 		open = false;
@@ -135,44 +147,68 @@
 
 	const modalities = [
 		{
-			value: '1',
-			label: 'Voy al lugar'
+			value: 'service_location',
+			label: 'Mi ubicación'
 		},
 		{
-			value: '2',
-			label: 'Vienen al lugar'
+			value: 'client_home',
+			label: 'Ubicación del cliente'
 		},
 		{
-			value: '3',
-			label: 'En linea'
+			value: 'online',
+			label: 'Online'
 		}
 	];
 
-	let modality = $state('');
-	const triggerContent = $derived(
-		modalities.find((f) => f.value === modality)?.label ?? 'Seleccione'
+	let selectedModalities = $state<string[]>([]);
+
+	const textModalities = $derived(
+		selectedModalities.reduce(
+			(acc, item) => [...acc, modalities.find((i) => i.value === item)!.label],
+			[] as string[]
+		)
 	);
 
-	let price = $state([25, 30000]);
+	const triggerContent = $derived(
+		textModalities.length > 0
+			? textModalities.length === 3
+				? 'Todas'
+				: textModalities.join(', ')
+			: 'Seleccione'
+	);
+
+	let prices = $state([25, 30000]);
 
 	let isLoading = $state<Record<string, boolean>>({});
-
-	const saveServiceProfile = () => {
-		console.log({
-			selectedAddress,
-			service,
-			price,
-			modality,
-			bio,
-			yearsOfExperience
-		});
-	};
 </script>
 
 <div class="flex h-full flex-col justify-between">
 	<div class="w-full px-2">
-		<h1 class="font-semibol mb-2 text-2xl">Crea tu perfil</h1>
-		<form action="" class="flex flex-col gap-5">
+		<h1 class="font-semibol text-2xl">Crea tu perfil</h1>
+		<p class="mb-5 font-light opacity-65">Completa toda la información para dar el primer paso</p>
+		<form
+			method="POST"
+			action="?/create"
+			class="flex flex-col gap-5"
+			use:enhance={({ formData }) => {
+				isLoading['createProfile'] = true;
+
+				formData.set('serviceId', serviceId);
+				formData.set('selectedModalities', JSON.stringify(selectedModalities));
+				formData.set('selectedAddress', JSON.stringify(selectedAddress));
+				formData.set('prices', JSON.stringify(prices));
+
+				return ({ result, update }) => {
+					isLoading['createProfile'] = false;
+					if (result.type === 'failure') {
+						update({ reset: false, invalidateAll: false });
+					} else if (result.type === 'success') {
+						update({ reset: true, invalidateAll: true });
+						goto('/map', { replaceState: true });
+					}
+				};
+			}}
+		>
 			<div>
 				<span class="mb-1 text-sm font-light">Elige el servicio que vas a ofrecer</span>
 				<Popover.Root bind:open>
@@ -181,7 +217,7 @@
 							<Button
 								{...props}
 								variant="secondary"
-								class="flex w-full justify-between shadow-md"
+								class="bg-input dark:bg-secondary flex w-full justify-between shadow-md"
 								role="combobox"
 								aria-expanded={open}
 							>
@@ -194,7 +230,7 @@
 							</Button>
 						{/snippet}
 					</Popover.Trigger>
-					<Popover.Content class="w-full p-0">
+					<Popover.Content class="w-[300px] p-2">
 						<Command.Root>
 							<Command.Input placeholder="Buscar servicio" />
 							<Command.List>
@@ -202,14 +238,15 @@
 								<Command.Group value="options">
 									{#each services as option, i (option.value + '-' + i)}
 										<Command.Item
-											value={option.value!}
+											value={option.value}
 											onSelect={() => {
-												service = option.value!;
+												service = option.value;
+												serviceId = option.id;
 												closeAndFocusTrigger();
 											}}
 										>
 											<CheckIcon class={cn(service !== option.value && 'text-transparent')} />
-											{option.label}
+											{option.value}
 										</Command.Item>
 									{/each}
 								</Command.Group>
@@ -221,11 +258,11 @@
 			<div class="flex w-full flex-row items-center gap-2">
 				<div class="w-full">
 					<span class="mb-1 text-sm font-light">Años de experiencia</span>
-					<Input bind:value={yearsOfExperience} type="number" />
+					<Input name="yearsOfExperience" bind:value={yearsOfExperience} type="number" />
 				</div>
 				<div class="w-full">
 					<span class="mb-1 text-sm font-light">Modalidad del servicio</span>
-					<Select.Root type="single" bind:value={modality}>
+					<Select.Root type="multiple" bind:value={selectedModalities}>
 						<Select.Trigger class="w-full">
 							{triggerContent}
 						</Select.Trigger>
@@ -245,23 +282,43 @@
 			<div class="flex flex-col gap-3">
 				<span class="text-sm font-light">Rango de precio por tu servicio</span>
 				<div class="flex flex-row items-center gap-5">
-					<span>{formatPrice(price[0])}</span>
-					<Slider type="multiple" bind:value={price} max={100000} step={1} class="w-full" />
-					<span>{formatPrice(price[1])}</span>
+					<span>{formatPrice(prices[0])}</span>
+					<Slider type="multiple" bind:value={prices} max={100000} step={1} class="w-full" />
+					<span>{formatPrice(prices[1])}</span>
 				</div>
 			</div>
 			<div class="flex flex-col">
 				<span class="mb-1 text-sm font-light">Dirección</span>
 				<div class="flex w-full flex-row items-center justify-between gap-2">
-					<Input type="text" placeholder="Corrientes 254" bind:value={inputSearchAddress} />
-					<Button onclick={() => searchAddress()} disabled={isLoading['searchAddress']}>
-						{#if isLoading['searchAddress']}
-							<Loader class="animate-spin" />
-						{:else}
-							Buscar
-						{/if}
-					</Button>
-					<Button onclick={() => searchReverseAddress()} disabled={isLoading['reverseAddress']}>
+					{#if selectedAddress}
+						<div class="flex w-full flex-row items-center justify-between">
+							<p>{selectedAddress.fullAddress}</p>
+							<Button
+								onclick={() => {
+									selectedAddress = null;
+								}}
+								variant="outline"
+								size="icon"
+							>
+								<Pen />
+							</Button>
+						</div>
+					{:else}
+						<Input
+							type="text"
+							placeholder="Corrientes 254"
+							bind:value={inputSearchAddress}
+							{@attach attachmentInputSearch}
+						/>
+					{/if}
+					{#if isLoading['searchAddress']}
+						<Loader class="animate-spin" />
+					{/if}
+					<Button
+						onclick={() => searchReverseAddress()}
+						size="icon"
+						disabled={isLoading['reverseAddress']}
+					>
 						{#if isLoading['reverseAddress']}
 							<Loader class="animate-spin" />
 						{:else}
@@ -299,49 +356,25 @@
 				<Label for="message" class="font-light">Biografía</Label>
 				<Textarea
 					bind:value={bio}
+					name="bio"
 					maxlength={255}
 					placeholder="Escribe tu biografía acá..."
 					id="message"
 				/>
 			</div>
-			<Button onclick={saveServiceProfile}>Guardar</Button>
+			{#if form && form.error}
+				<span class="tex-center font-light text-red-500"
+					>Algunos campos no son correctos o faltan</span
+				>
+			{/if}
+			<Button type="submit">
+				{#if isLoading['createProfile']}
+					<Loader class="animate-spin" />
+				{:else}
+					Guardar
+				{/if}
+			</Button>
 		</form>
 	</div>
 	<Footer />
 </div>
-
-<!-- 
-{
-	id: '1',
-	coordinates: [-57.533954, -38.025093],
-	fullAddress: 'Rodríguez Peña 208, Mar del Plata, Buenos Aires Province, B7602, Argentina'
-},
-{
-	id: '2',
-	coordinates: [-58.059972, -29.798165],
-	fullAddress: 'Rodríguez Peña 208, Curuzú Cuatiá, Corrientes, 3460, Argentina'
-},
-{
-	id: '3',
-	coordinates: [-58.278469, -34.714783],
-	fullAddress: 'Rodríguez Peña 208, Bernal Este, Buenos Aires Province, B1876, Argentina'
-},
-{
-	id: '4',
-	coordinates: [-58.397274, -34.74154],
-	fullAddress: 'Nicolás Rodríguez Peña 208, Banfield, Buenos Aires Province, B1828, Argentina'
-},
-{
-	id: '5',
-	coordinates: [-58.390736, -34.606622],
-	fullAddress: 'Rodríguez Peña 208, San Nicolas, Buenos Aires, C1020, Argentina'
-} -->
-
-<style>
-	:global(.search-box-mapbox) {
-		/* Tus estilos aquí */
-		border-radius: 0.5rem;
-		background-color: red;
-		/* ... */
-	}
-</style>

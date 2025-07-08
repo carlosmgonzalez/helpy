@@ -25,7 +25,7 @@
 	});
 </script>
 
-<nav class="flex h-[80px] w-full">
+<nav class="flex h-[60px] w-full">
 	<div class="flex h-full w-full items-center justify-between px-2">
 		<div class="w-20">
 			<Button onclick={() => sidebar.toggle()} variant="ghost" size="icon">

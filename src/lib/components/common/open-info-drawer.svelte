@@ -22,9 +22,9 @@
 		<Drawer.Header class="flex flex-row items-center gap-2">
 			{#if image}
 				<div
-					class="border-primary/40 flex items-center justify-center rounded-full border bg-white p-2"
+					class="border-primary/80 flex items-center justify-center rounded-full border-2 bg-white p-0.5"
 				>
-					<img src={image} alt={name} class="h-auto w-20" />
+					<img src={image} alt={name} class="h-auto w-20 rounded-full" />
 				</div>
 			{/if}
 			<div class="flex flex-col">
