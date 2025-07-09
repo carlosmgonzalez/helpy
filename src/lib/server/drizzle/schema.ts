@@ -154,7 +154,8 @@ export const clientProfile = pgTable('client_profile', {
 	userId: text('user_id')
 		.references(() => user.id, { onDelete: 'cascade' })
 		.notNull(),
-	location: geometry('location', { type: 'point', mode: 'xy', srid: 4326 }).notNull()
+	location: geometry('location', { type: 'point', mode: 'xy', srid: 4326 }).notNull(),
+	address: text('address').notNull()
 });
 
 export const clientProfileRelation = relations(clientProfile, ({ many }) => ({

@@ -77,6 +77,18 @@
 		});
 	};
 
+	const attachmentInputPriceFrom: Attachment = (element) => {
+		if (isFocusedPriceFrom) {
+			(element as HTMLInputElement).focus();
+		}
+	};
+
+	const attachmentInputPriceTo: Attachment = (element) => {
+		if (isFocusedPriceTo) {
+			(element as HTMLInputElement).focus();
+		}
+	};
+
 	const searchReverseAddress = () => {
 		isLoading['reverseAddress'] = true;
 		if ('geolocation' in navigator) {
@@ -467,57 +479,46 @@
 								<div class="flex flex-row items-center gap-2">
 									<div class="flex w-full flex-row items-center gap-2">
 										<span class="text-sm font-light">Desde:</span>
-										<Input type="number" bind:value={priceFrom} />
-										<!-- {#if isFocusedPriceFrom}
+										<!-- <Input type="number" bind:value={priceFrom} /> -->
+										{#if isFocusedPriceFrom}
 											<Input
 												type="number"
 												bind:value={priceFrom}
-												onfocusin={() => {
-													isFocusedPriceFrom = true;
-												}}
 												onfocusout={() => {
 													isFocusedPriceFrom = false;
 												}}
+												{@attach attachmentInputPriceFrom}
 											/>
 										{:else}
 											<Input
 												type="text"
 												value={formatPrice(priceFrom)}
-												onfocusin={() => {
+												onclick={() => {
 													isFocusedPriceFrom = true;
 												}}
-												onfocusout={() => {
-													isFocusedPriceFrom = false;
-												}}
 											/>
-										{/if} -->
+										{/if}
 									</div>
 									<div class="flex w-full flex-row items-center gap-2">
 										<span class="text-sm font-light">Hasta:</span>
-										<Input type="number" bind:value={priceTo} />
-										<!-- {#if isFocusedPriceTo}
+										{#if isFocusedPriceTo}
 											<Input
 												type="number"
 												bind:value={priceTo}
-												onfocusin={() => {
-													isFocusedPriceTo = true;
-												}}
 												onfocusout={() => {
 													isFocusedPriceTo = false;
 												}}
+												{@attach attachmentInputPriceTo}
 											/>
 										{:else}
 											<Input
 												type="text"
 												value={formatPrice(priceTo)}
-												onfocusin={() => {
+												onclick={() => {
 													isFocusedPriceTo = true;
 												}}
-												onfocusout={() => {
-													isFocusedPriceTo = false;
-												}}
 											/>
-										{/if} -->
+										{/if}
 									</div>
 								</div>
 							</div>

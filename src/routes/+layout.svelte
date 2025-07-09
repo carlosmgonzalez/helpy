@@ -8,6 +8,10 @@
 	let { children } = $props();
 </script>
 
+<svelte:head>
+	<link href="https://api.mapbox.com/mapbox-gl-js/v3.12.0/mapbox-gl.css" rel="stylesheet" />
+</svelte:head>
+
 <Sidebar.Provider>
 	<ModeWatcher />
 	<AppSidebar />

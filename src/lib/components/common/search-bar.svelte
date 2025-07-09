@@ -37,23 +37,24 @@
 
 <Popover.Root bind:open>
 	<Popover.Trigger bind:ref={triggerRef}>
-		<!-- {#snippet child({ props })} -->
-		<Button
-			variant="secondary"
-			class="flex w-[300px] justify-between shadow-md"
-			role="combobox"
-			aria-expanded={open}
-		>
-			{#if selectedValue}
-				<span class="text-sm">{selectedValue}</span>
-			{:else}
-				<span class="text-sm">Buscar servicio</span>
-			{/if}
-			<ChevronsUpDownIcon />
-		</Button>
-		<!-- {/snippet} -->
+		{#snippet child({ props })}
+			<Button
+				{...props}
+				variant="secondary"
+				class="flex w-[300px] justify-between"
+				role="combobox"
+				aria-expanded={open}
+			>
+				{#if selectedValue}
+					<span class="text-sm">{selectedValue}</span>
+				{:else}
+					<span class="text-sm">Buscar servicio</span>
+				{/if}
+				<ChevronsUpDownIcon />
+			</Button>
+		{/snippet}
 	</Popover.Trigger>
-	<Popover.Content class="w-[300px] p-0">
+	<Popover.Content class="p-2">
 		<Command.Root>
 			<Command.Input placeholder={`Buscar servicio`} />
 			<Command.List>

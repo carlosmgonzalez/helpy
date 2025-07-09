@@ -36,6 +36,13 @@
       "when": 1752008299905,
       "tag": "0004_not_null_updated_created_at",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1752087981280,
+      "tag": "0005_add_address_client_profile",
+      "breakpoints": true
     }
   ]
 }

@@ -1,0 +1,1 @@
+ALTER TABLE "client_profile" ADD COLUMN "address" text NOT NULL;

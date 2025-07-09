@@ -2,96 +2,91 @@
 	import mapboxgl from 'mapbox-gl';
 	import { PUBLIC_MAPBOX_TOKEN } from '$env/static/public';
 	import { onMount } from 'svelte';
-	import SearchBar from '$lib/components/common/search-bar.svelte';
 	import FilterButton from '$lib/components/common/filter-button.svelte';
 	import OpenInfoDrawer from '$lib/components/common/open-info-drawer.svelte';
 	import type { PageProps } from './$types';
-	import { House } from '@lucide/svelte';
+	import { House, Loader } from '@lucide/svelte';
+	import SearchAddressBar from '$lib/components/search-bar/search-address-bar.svelte';
 
 	let mapContainer: HTMLElement;
-	let service = $state('');
+	let map: mapboxgl.Map | undefined;
+	let userMarker: mapboxgl.Marker | undefined;
 
 	const { data }: PageProps = $props();
 
-	const createMap = (lon: number, lat: number) => {
-		const map = new mapboxgl.Map({
-			container: mapContainer,
-			style: 'mapbox://styles/mapbox/light-v11',
-			center: [lon, lat],
-			zoom: 15
-		});
+	let isLoading = $state(true);
 
-		const el = document.getElementById('el')!;
-		new mapboxgl.Marker(el).setLngLat([lon, lat]).addTo(map);
-
-		// Usar setTimeout para asegurar que los elementos DOM estén disponibles
-		setTimeout(() => {
-			data.initialData!.forEach(({ user, service_profile }) => {
-				const a = document.getElementById(user.id);
-				if (a) {
-					new mapboxgl.Marker(a)
-						.setLngLat([service_profile.location.x, service_profile.location.y])
-						.addTo(map);
-				}
-			});
-		}, 0);
-	};
-
+	// onMount se usa para inicialización que solo ocurre una vez.
 	onMount(() => {
 		mapboxgl.accessToken = PUBLIC_MAPBOX_TOKEN;
+	});
+
+	// $effect se ejecuta cada vez que 'data' cambia.
+	$effect(() => {
+		isLoading = true;
+
+		// Función para crear/actualizar el mapa y los marcadores
+		const setupMap = (lon: number, lat: number) => {
+			if (!map && mapContainer) {
+				// Si el mapa no existe, créalo
+				map = new mapboxgl.Map({
+					container: mapContainer,
+					style: 'mapbox://styles/mapbox/light-v11',
+					center: [lon, lat],
+					zoom: 15
+				});
+
+				const el = document.getElementById('el')!;
+				userMarker = new mapboxgl.Marker(el).setLngLat([lon, lat]).addTo(map);
+
+				// Añadir otros marcadores
+				data.serviceOfInterest?.forEach(({ user, service_profile }) => {
+					const a = document.getElementById(user.id);
+					if (a) {
+						new mapboxgl.Marker(a)
+							.setLngLat([service_profile.location.x, service_profile.location.y])
+							.addTo(map!);
+					}
+				});
+			} else if (map && userMarker) {
+				// Si el mapa ya existe, solo actualiza el centro y la posición del marcador
+				map.flyTo({ center: [lon, lat] });
+				userMarker.setLngLat([lon, lat]);
+			}
+			isLoading = false;
+		};
 
 		if (data.client) {
 			const { x, y } = data.client.location;
-			createMap(x, y);
-		} else {
-			if ('geolocation' in navigator) {
-				navigator.geolocation.getCurrentPosition(
-					(position) => {
-						const longitude = position.coords.longitude;
-						const latitude = position.coords.latitude;
-
-						createMap(longitude, latitude);
-					},
-					(error) => {
-						switch (error.code) {
-							case error.PERMISSION_DENIED:
-								console.error('Usuario denegó la solicitud de geolocalización.');
-								break;
-							case error.POSITION_UNAVAILABLE:
-								console.error('Información de ubicación no disponible.');
-								break;
-							case error.TIMEOUT:
-								console.error('La solicitud de obtener la ubicación ha caducado.');
-								break;
-							default:
-								console.error('Un error desconocido ocurrió.');
-								break;
-						}
-					}
-				);
-			}
+			setupMap(x, y);
+		} else if ('geolocation' in navigator) {
+			// Lógica de geolocalización de respaldo
+			navigator.geolocation.getCurrentPosition(
+				(position) => {
+					setupMap(position.coords.longitude, position.coords.latitude);
+				},
+				(error) => {
+					console.error('Error de geolocalización:', error.message);
+					isLoading = false;
+				}
+			);
 		}
 	});
 </script>
 
-<svelte:head>
-	<title>Helpy</title>
-	<link href="https://api.mapbox.com/mapbox-gl-js/v3.12.0/mapbox-gl.css" rel="stylesheet" />
-</svelte:head>
-
-<div class="flex w-full flex-row items-center justify-center gap-2 py-3">
-	<SearchBar options={[]} value={service} />
+<div class="flex w-full flex-row items-start justify-center gap-2 px-2 py-3">
+	<SearchAddressBar clientProfileId={data.client!.id} addressText={data.client!.address} />
 	<FilterButton />
 </div>
 <div class="w-full flex-1 p-2">
 	<div bind:this={mapContainer} class="h-full w-full rounded-md">
-		<div id="el">
+		<div id="el" hidden={isLoading}>
 			<House class="size-7 fill-blue-800/80 text-blue-800" />
 		</div>
 
-		{#if data.initialData}
-			{#each data.initialData as info (info.user.id)}
-				<div id={info.user.id}>
+		{#if data.serviceOfInterest}
+			{#each data.serviceOfInterest as info, i (i + '-' + info.user.id)}
+				<div id={info.user.id} hidden={isLoading}>
 					<OpenInfoDrawer
 						name={info.user.name}
 						image={info.user.image}
@@ -101,6 +96,12 @@
 					/>
 				</div>
 			{/each}
+		{/if}
+
+		{#if isLoading}
+			<div class="flex h-full w-full items-center justify-center">
+				<Loader class="size-14 animate-spin" />
+			</div>
 		{/if}
 	</div>
 </div>

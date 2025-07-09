@@ -161,7 +161,8 @@ export const actions = {
 					location: {
 						x: data.address.coordinates[0],
 						y: data.address.coordinates[1]
-					}
+					},
+					address: data.address.fullAddress
 				})
 				.returning();
 
