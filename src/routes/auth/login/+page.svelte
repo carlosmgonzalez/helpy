@@ -59,7 +59,10 @@
 				<div class="grid gap-2">
 					<div class="flex items-center">
 						<Label for="password">Contraseña</Label>
-						<a href="##" class="ml-auto inline-block text-sm underline-offset-4 hover:underline">
+						<a
+							href="/auth/password/send"
+							class="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+						>
 							Olvidaste tu contraseña?
 						</a>
 					</div>

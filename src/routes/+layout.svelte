@@ -4,6 +4,7 @@
 	import AppSidebar from '$lib/components/layout/app-sidebar.svelte';
 	import AppNavbar from '$lib/components/layout/app-navbar.svelte';
 	import { ModeWatcher } from 'mode-watcher';
+	import { Toaster } from '$lib/components/ui/sonner';
 
 	let { children } = $props();
 </script>
@@ -12,6 +13,7 @@
 	<link href="https://api.mapbox.com/mapbox-gl-js/v3.12.0/mapbox-gl.css" rel="stylesheet" />
 </svelte:head>
 
+<Toaster />
 <Sidebar.Provider>
 	<ModeWatcher />
 	<AppSidebar />
