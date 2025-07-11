@@ -1,6 +1,7 @@
 import db from '$lib/server/drizzle';
 import { clientProfile } from '$lib/server/drizzle/schema';
 import { error, json, type RequestHandler } from '@sveltejs/kit';
+import { eq } from 'drizzle-orm';
 import z from 'zod';
 
 const BodySchema = z.object({
@@ -27,13 +28,16 @@ export const PATCH: RequestHandler = async ({ request }) => {
 
 		if (!success) return json({ err });
 
-		await db.update(clientProfile).set({
-			location: {
-				x: data.address.coordinates[0],
-				y: data.address.coordinates[1]
-			},
-			address: data.address.fullAddress
-		});
+		await db
+			.update(clientProfile)
+			.set({
+				location: {
+					x: data.address.coordinates[0],
+					y: data.address.coordinates[1]
+				},
+				address: data.address.fullAddress
+			})
+			.where(eq(clientProfile.id, data.clientProfileId));
 
 		return json({ ok: true });
 	} catch (err) {

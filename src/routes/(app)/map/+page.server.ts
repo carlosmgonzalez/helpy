@@ -1,5 +1,5 @@
 import db from '$lib/server/drizzle';
-import { clientProfile, service, serviceProfile, user } from '$lib/server/drizzle/schema';
+import { clientProfile, service, providerProfile, user } from '$lib/server/drizzle/schema';
 import { eq } from 'drizzle-orm';
 import type { PageServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
@@ -24,10 +24,10 @@ export const load: PageServerLoad = async ({ parent, depends }) => {
 	try {
 		const serviceOfInterest = await db
 			.select()
-			.from(serviceProfile)
-			.where(eq(serviceProfile.serviceId, client!.clientServiceInterest[0].serviceId))
-			.innerJoin(user, eq(serviceProfile.userId, user.id))
-			.innerJoin(service, eq(serviceProfile.serviceId, service.id));
+			.from(providerProfile)
+			.where(eq(providerProfile.serviceId, client!.clientServiceInterest[0].serviceId))
+			.innerJoin(user, eq(providerProfile.userId, user.id))
+			.innerJoin(service, eq(providerProfile.serviceId, service.id));
 
 		return {
 			client,

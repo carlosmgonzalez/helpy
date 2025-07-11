@@ -11,6 +11,7 @@
 	let mapContainer: HTMLElement;
 	let map: mapboxgl.Map | undefined;
 	let userMarker: mapboxgl.Marker | undefined;
+	let serviceMarkers: mapboxgl.Marker[] = []; // Guardar los marcadores de servicio
 
 	const { data }: PageProps = $props();
 
@@ -38,21 +39,27 @@
 
 				const el = document.getElementById('el')!;
 				userMarker = new mapboxgl.Marker(el).setLngLat([lon, lat]).addTo(map);
-
-				// Añadir otros marcadores
-				data.serviceOfInterest?.forEach(({ user, service_profile }) => {
-					const a = document.getElementById(user.id);
-					if (a) {
-						new mapboxgl.Marker(a)
-							.setLngLat([service_profile.location.x, service_profile.location.y])
-							.addTo(map!);
-					}
-				});
 			} else if (map && userMarker) {
 				// Si el mapa ya existe, solo actualiza el centro y la posición del marcador
 				map.flyTo({ center: [lon, lat] });
 				userMarker.setLngLat([lon, lat]);
 			}
+
+			// Limpiar marcadores antiguos
+			serviceMarkers.forEach((marker) => marker.remove());
+			serviceMarkers = [];
+
+			// Añadir nuevos marcadores
+			data.serviceOfInterest?.forEach(({ user, provider_profile }) => {
+				const markerElement = document.getElementById(user.id);
+				if (markerElement) {
+					const newMarker = new mapboxgl.Marker(markerElement)
+						.setLngLat([provider_profile.location.x, provider_profile.location.y])
+						.addTo(map!);
+					serviceMarkers.push(newMarker); // Guardar la referencia
+				}
+			});
+
 			isLoading = false;
 		};
 
@@ -90,9 +97,9 @@
 					<OpenInfoDrawer
 						name={info.user.name}
 						image={info.user.image}
-						bio={info.service_profile.bio!}
-						priceFrom={info.service_profile.priceFrom}
-						priceTo={info.service_profile.priceTo}
+						bio={info.provider_profile.bio!}
+						priceFrom={info.provider_profile.priceFrom}
+						priceTo={info.provider_profile.priceTo}
 					/>
 				</div>
 			{/each}

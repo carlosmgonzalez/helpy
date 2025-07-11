@@ -31,7 +31,7 @@ export const usersSeed = [
 	}
 ];
 
-export const serviceProfilesSeed = [
+export const providersProfilesSeed = [
 	{
 		id: 'c3c3d661-8c79-5c8c-96f2-75b4eb963146',
 		userId: 'c2b2d661-8c79-5c8c-96f2-75b4eb963145',

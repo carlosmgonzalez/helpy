@@ -5,7 +5,7 @@ import {
 	clientProfile,
 	clientServiceInterest,
 	service,
-	serviceProfile,
+	providerProfile,
 	type ModalityType
 } from '$lib/server/drizzle/schema';
 import z from 'zod';
@@ -73,7 +73,7 @@ const FormClientSchema = z.object({
 });
 
 export const actions = {
-	createServiceProfile: async ({ request }) => {
+	createProviderProfile: async ({ request }) => {
 		const form = await request.formData();
 		const serviceId = form.get('serviceId') as string;
 		const modalities = JSON.parse(form.get('selectedModalities') as string);
@@ -108,7 +108,7 @@ export const actions = {
 				});
 			}
 
-			await db.insert(serviceProfile).values({
+			await db.insert(providerProfile).values({
 				userId: session.user.id,
 				location: {
 					x: data.address.coordinates[0],

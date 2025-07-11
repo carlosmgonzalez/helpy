@@ -36,6 +36,14 @@ export const dayOfWeek = pgEnum('day_of_week', [
 export const modality = pgEnum('service_modality', ['service_location', 'client_home', 'online']);
 export type ModalityType = (typeof modality.enumValues)[number];
 
+export const animalSpecies = pgEnum('animal_species', [
+	'dog',
+	'cat',
+	'exotic',
+	'bird',
+	'livestock'
+]);
+
 export const user = pgTable(
 	'user',
 	{
@@ -57,7 +65,8 @@ export const user = pgTable(
 );
 
 export const userRelation = relations(user, ({ one }) => ({
-	providerProfile: one(serviceProfile)
+	providerProfile: one(providerProfile),
+	clientProfile: one(clientProfile)
 }));
 
 export const session = pgTable('session', {
@@ -107,12 +116,12 @@ export const service = pgTable('service', {
 });
 
 export const serviceRelation = relations(service, ({ many }) => ({
-	serviceProfile: many(serviceProfile),
+	providerProfile: many(providerProfile),
 	clientServiceInterest: many(clientServiceInterest)
 }));
 
-export const serviceProfile = pgTable(
-	'service_profile',
+export const providerProfile = pgTable(
+	'provider_profile',
 	{
 		id: uuid('id').defaultRandom().primaryKey(),
 		bio: text('bio'),
@@ -138,15 +147,16 @@ export const serviceProfile = pgTable(
 	]
 );
 
-export const serviceProfileRelation = relations(serviceProfile, ({ one }) => ({
+export const providerProfileRelation = relations(providerProfile, ({ one }) => ({
 	user: one(user, {
-		fields: [serviceProfile.userId],
+		fields: [providerProfile.userId],
 		references: [user.id]
 	}),
 	service: one(service, {
-		fields: [serviceProfile.serviceId],
+		fields: [providerProfile.serviceId],
 		references: [service.id]
-	})
+	}),
+	veterinaryProfile: one(veterinaryProviderProfile)
 }));
 
 export const clientProfile = pgTable('client_profile', {
@@ -193,12 +203,62 @@ export const appointment = pgTable('appointment', {
 	clientProfileId: uuid('client_profile_id')
 		.references(() => clientProfile.id, { onDelete: 'cascade' })
 		.notNull(),
-	serviceProfileId: uuid('service_profile_id')
-		.references(() => serviceProfile.id, { onDelete: 'cascade' })
+	providerProfileId: uuid('provider_profile_id')
+		.references(() => providerProfile.id, { onDelete: 'cascade' })
 		.notNull(),
 	status: appointmentStatus('status').default('pending'),
-	priceAtBookin: integer('price_at_bookin').notNull(),
+	priceAtBooking: integer('price_at_booking').notNull(),
 	appointmentTime: timestamp('appointment_time', { precision: 3, mode: 'string' }).notNull(),
 	createdAt: timestamp('created_at', { precision: 3, mode: 'string' }).notNull().defaultNow(),
 	updatedAt: timestamp('updated_at', { precision: 3, mode: 'string' }).notNull().defaultNow()
 });
+
+export const appointmentRelation = relations(appointment, ({ one }) => ({
+	clientProfile: one(clientProfile, {
+		fields: [appointment.clientProfileId],
+		references: [clientProfile.id]
+	}),
+	providerProfile: one(providerProfile, {
+		fields: [appointment.providerProfileId],
+		references: [providerProfile.id]
+	})
+}));
+
+export const providerSchedule = pgTable('provider_schedule', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	providerProfileId: uuid('provider_profile_id')
+		.references(() => providerProfile.id, { onDelete: 'cascade' })
+		.notNull(),
+	day: dayOfWeek('day').notNull(),
+	from: varchar('from', { length: 5 }).notNull(),
+	to: varchar('to', { length: 5 }).notNull()
+});
+
+export const providerScheduleRelation = relations(providerSchedule, ({ one }) => ({
+	providerProfile: one(providerProfile, {
+		fields: [providerSchedule.providerProfileId],
+		references: [providerProfile.id]
+	})
+}));
+
+export const veterinaryProviderProfile = pgTable('veterinary_provider_profile', {
+	providerProfileId: uuid('provider_profile_id')
+		.references(() => providerProfile.id, { onDelete: 'cascade' })
+		.primaryKey(),
+	licenseNumber: varchar('license_number', { length: 100 }).notNull(),
+	university: varchar('university', { length: 255 }),
+	clinicName: varchar('clinic_name', { length: 255 }),
+	emergencyServices: boolean('emergency_services').default(false).notNull(),
+	animalSpecies: animalSpecies('animal_species').array().notNull(),
+	specializations: text('specializations').array() // e.g., ['Cardiology', 'Dentistry']
+});
+
+export const veterinaryProviderProfileRelation = relations(
+	veterinaryProviderProfile,
+	({ one }) => ({
+		providerProfile: one(providerProfile, {
+			fields: [veterinaryProviderProfile.providerProfileId],
+			references: [providerProfile.id]
+		})
+	})
+);

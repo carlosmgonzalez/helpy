@@ -11,11 +11,6 @@
 	import ChevronsUpDownIcon from '@lucide/svelte/icons/chevrons-up-down';
 	import Input from '$lib/components/ui/input/input.svelte';
 	import { formatPrice } from '$lib/utils/formatters';
-	import { PUBLIC_MAPBOX_TOKEN } from '$env/static/public';
-	import type {
-		ResponseReverseGeocode,
-		ResponseSearchGeocode
-	} from '$lib/interfaces/response-geocode-mapbox';
 	import { Loader, Locate, Pen } from '@lucide/svelte';
 	import type { PageProps } from './$types';
 	import Footer from '$lib/components/layout/footer.svelte';
@@ -25,17 +20,9 @@
 	import { goto } from '$app/navigation';
 	import * as Card from '$lib/components/ui/card/index';
 	import * as Tabs from '$lib/components/ui/tabs/index.js';
+	import { getAddress, getReverseAddress, type Address } from '$lib/services/address';
 
 	const { data: loadedData, form }: PageProps = $props();
-
-	const urlSearch = `https://api.mapbox.com/search/geocode/v6/forward?autocomplete=true&country=ar&types=address,street&access_token=${PUBLIC_MAPBOX_TOKEN}`;
-	const urlReverse = `https://api.mapbox.com/search/geocode/v6/reverse?types=address,street&access_token=${PUBLIC_MAPBOX_TOKEN}`;
-
-	interface Address {
-		id: string;
-		coordinates: number[];
-		fullAddress: string;
-	}
 
 	let bio = $state('');
 	let yearsOfExperience = $state(0);
@@ -48,8 +35,7 @@
 	const searchAddress = async () => {
 		isLoading['searchAddress'] = true;
 		try {
-			const res = await fetch(`${urlSearch}&q=${inputSearchAddress}`);
-			const data: ResponseSearchGeocode = await res.json();
+			const data = await getAddress(inputSearchAddress);
 			if (data && data.features.length > 0) {
 				suggestedAddressesList = data.features.map((f) => ({
 					id: f.id,
@@ -97,9 +83,8 @@
 					try {
 						const longitude = position.coords.longitude.toString();
 						const latitude = position.coords.latitude.toString();
+						const data = await getReverseAddress(longitude, latitude);
 
-						const res = await fetch(`${urlReverse}&longitude=${longitude}&latitude=${latitude}`);
-						const data: ResponseReverseGeocode = await res.json();
 						if (data && data.features.length > 0) {
 							selectedAddress = {
 								id: data.features[0].id,
@@ -115,21 +100,8 @@
 					}
 				},
 				(error) => {
+					console.error('Error de geolocalización:', error.message);
 					isLoading['reverseAddress'] = false;
-					switch (error.code) {
-						case error.PERMISSION_DENIED:
-							console.error('Usuario denegó la solicitud de geolocalización.');
-							break;
-						case error.POSITION_UNAVAILABLE:
-							console.error('Información de ubicación no disponible.');
-							break;
-						case error.TIMEOUT:
-							console.error('La solicitud de obtener la ubicación ha caducado.');
-							break;
-						default:
-							console.error('Un error desconocido ocurrió.');
-							break;
-					}
 				}
 			);
 		} else {
@@ -381,8 +353,8 @@
 					<Card.Content>
 						<form
 							method="POST"
-							action="?/createServiceProfile"
-							id="createServiceProfile"
+							action="?/createProviderProfile"
+							id="createProviderProfile"
 							class="flex flex-col gap-5"
 							use:enhance={({ formData }) => {
 								isLoading['createProfile'] = true;
@@ -605,7 +577,7 @@
 						</form>
 					</Card.Content>
 					<Card.Footer>
-						<Button type="submit" form="createServiceProfile">
+						<Button type="submit" form="createProviderProfile">
 							{#if isLoading['createProfile']}
 								<Loader class="animate-spin" />
 							{:else}
